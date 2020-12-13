@@ -1,0 +1,27 @@
+{
+  "name": "traffic-lights-simulator",
+  "version": "1.0.0",
+  "description": "Simulador de semaforo",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edwardjjc/traffic-lights-simulator.git"
+  },
+  "author": "Edward Jimenez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/edwardjjc/traffic-lights-simulator/issues"
+  },
+  "homepage": "https://github.com/edwardjjc/traffic-lights-simulator#readme",
+  "dependencies": {
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "http": "0.0.1-security",
+    "mqtt": "^4.2.6",
+    "ws": "^7.4.1"
+  }
+}

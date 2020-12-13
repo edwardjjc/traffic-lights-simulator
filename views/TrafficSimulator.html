@@ -1,0 +1,98 @@
+<html>
+    <head>
+        <script>
+            var interval;
+            let estadoActual = "VERDE_HORIZONTAL";
+            let socket = new WebSocket("ws://localhost:8081");
+
+            socket.onmessage = function(event) {
+                //alert(`[message] Data received from server: ${event.data}`);
+                if(event.data == "INICIAR_SEMAFORO"){
+                    startTrafficLight();
+                }
+            };
+
+            function stopTrafficLight(){
+                clearInterval(interval);
+            }
+
+            function startTrafficLight(){
+                interval = setInterval(trafficLight, 10000);
+            }
+
+            function trafficLight() {
+                    var northImg = document.getElementById("north");
+                    var southImg = document.getElementById("south");
+                    var eastImg = document.getElementById("east");
+                    var westImg = document.getElementById("west");
+
+                    if(estadoActual == "VERDE_HORIZONTAL") {
+                        estadoActual = "VERDE_VERTICAL";
+
+                        northImg.src = "./red light.jpg"
+                        southImg.src = "./red light.jpg"
+                        eastImg.src = "./yellow light.jpg"
+                        westImg.src = "./yellow light.jpg"
+                        setTimeout(function(){
+                            northImg.src = "./green light.jpg"
+                            southImg.src = "./green light.jpg"
+                            eastImg.src = "./red light.jpg"
+                            westImg.src = "./red light.jpg"
+                        }, 3000);
+                    } else {
+                        estadoActual = "VERDE_HORIZONTAL";
+                        
+                        northImg.src = "./yellow light.jpg"
+                        southImg.src = "./yellow light.jpg"
+                        eastImg.src = "./red light.jpg"
+                        westImg.src = "./red light.jpg"
+                        setTimeout(function(){
+                            northImg.src = "./red light.jpg"
+                            southImg.src = "./red light.jpg"
+                            eastImg.src = "./green light.jpg"
+                            westImg.src = "./green light.jpg"
+                        }, 3000);
+                    }
+                }
+        </script>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td>
+
+                </td>
+                <td>
+                    <img id="north" src="./red light.jpg" width="150px" height="150px">
+                </td>
+                <td>
+                    
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img id="east" src="./green light.jpg" width="150px" height="150px">
+                </td>
+                <td>
+                    
+                </td>
+                <td>
+                    <img id="west" src="./green light.jpg" width="150px" height="150px">
+                </td>
+            </tr>
+            <tr>
+                <td>
+
+                </td>
+                <td>
+                    <img id="south" src="./red light.jpg" width="150px" height="150px">
+                </td>
+                <td>
+                    
+                </td>
+            </tr>
+        </table>
+        <button onclick="startTrafficLight()"> Iniciar Semaforo </button>
+        <button onclick="stopTrafficLight()"> Detener Semaforo </button>
+    </body>
+</html>
