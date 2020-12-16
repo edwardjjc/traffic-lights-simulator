@@ -1,26 +1,82 @@
 <html>
     <head>
         <script>
+            const TRAFFIC_LIGHT_TIME_INTERVAL = 60000;
+            const YELLOW_LIGHT_TIME_INTERVAL = 5000;
+            let actualTimeInterval = 0;
             var interval;
+            let inicioInterval;
             let estadoActual = "VERDE_HORIZONTAL";
             let socket = new WebSocket("ws://localhost:8081");
 
             socket.onmessage = function(event) {
                 //alert(`[message] Data received from server: ${event.data}`);
+                console.log(event);
                 if(event.data == "INICIAR_SEMAFORO"){
                     startTrafficLight();
                 }
+                if(event.data == "CRUZAR_CALLE_HORIZONTAL"){
+                    crossStreet();
+                }
             };
+
+            function crossStreet(){
+                let timeToCross = 10000;
+                let remainingTime = getRemainingTime();
+                let msg = { 
+                    event: "INICIO_CRUCE_CALLE",
+                    tiempoInicioEventoMS: 0, 
+                    tiempoMs: 0
+                };
+
+                if (estadoActual == "VERDE_HORIZONTAL"){
+                    msg.tiempoMs = remainingTime;
+                    msg.tiempoInicioEventoMS = 0;
+                    socket.send(JSON.stringify(msg));
+                } else {
+                    msg.tiempoMs = TRAFFIC_LIGHT_TIME_INTERVAL - YELLOW_LIGHT_TIME_INTERVAL;
+                    
+                    if (remainingTime > timeToCross) {
+                        inicioInterval = new Date();
+                        msg.tiempoInicioEventoMS = timeToCross + YELLOW_LIGHT_TIME_INTERVAL;
+                        stopTrafficLight();
+                        startTrafficLight(timeToCross);
+                    } else {
+                        msg.tiempoInicioEventoMS = remainingTime + YELLOW_LIGHT_TIME_INTERVAL;
+                    }
+                    socket.send(JSON.stringify(msg));
+                }
+            }
 
             function stopTrafficLight(){
                 clearInterval(interval);
             }
 
-            function startTrafficLight(){
-                interval = setInterval(trafficLight, 10000);
+            function startTrafficLight(timeInterval = TRAFFIC_LIGHT_TIME_INTERVAL){
+                actualTimeInterval = timeInterval
+                if(!inicioInterval){
+                    inicioInterval = new Date();
+                }
+                if (timeInterval == TRAFFIC_LIGHT_TIME_INTERVAL){
+                    interval = setInterval(trafficLight, timeInterval);
+                } else {
+                    interval = setInterval(trafficLight, timeInterval);
+                    setTimeout(() => {
+                        stopTrafficLight();
+                        startTrafficLight();
+                    }, (timeInterval + 500))
+                }
+            }
+
+            function getRemainingTime(){
+                let fechaActual = new Date();
+                let remainingTime = actualTimeInterval - (fechaActual - inicioInterval);
+                
+                return remainingTime;
             }
 
             function trafficLight() {
+                    inicioInterval = new Date();
                     var northImg = document.getElementById("north");
                     var southImg = document.getElementById("south");
                     var eastImg = document.getElementById("east");
@@ -38,7 +94,7 @@
                             southImg.src = "./green light.jpg"
                             eastImg.src = "./red light.jpg"
                             westImg.src = "./red light.jpg"
-                        }, 3000);
+                        }, YELLOW_LIGHT_TIME_INTERVAL);
                     } else {
                         estadoActual = "VERDE_HORIZONTAL";
                         
@@ -51,7 +107,7 @@
                             southImg.src = "./red light.jpg"
                             eastImg.src = "./green light.jpg"
                             westImg.src = "./green light.jpg"
-                        }, 3000);
+                        }, YELLOW_LIGHT_TIME_INTERVAL);
                     }
                 }
         </script>
@@ -94,5 +150,7 @@
         </table>
         <button onclick="startTrafficLight()"> Iniciar Semaforo </button>
         <button onclick="stopTrafficLight()"> Detener Semaforo </button>
+        <button onclick="getRemainingTime()"> Tiempo Restante Semaforo </button>
+        <button onclick="crossStreet()"> Cruzar la Calle </button>
     </body>
 </html>
